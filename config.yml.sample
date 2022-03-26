@@ -1,6 +1,7 @@
 general:
   loglevel: INFO
   token: 0000000000:xxxxxxxxxxxxxxxxxxxxxxx
+#  tgapi: http://localhost:4200/bot{0}/{1}
 netease:
   neteaseapi: https://netease-nodejs.vercel.app
   userid: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

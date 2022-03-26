@@ -20,6 +20,9 @@ logging.basicConfig(level=getattr(logging, log_level.upper(), 10),
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # Sign into Telegram
+if 'tgapi' in config['general']:
+    from telebot import apihelper
+    apihelper.API_URL = config['general']['tgapi']
 bot = telebot.TeleBot(token)
 
 # Handle '/start' and '/help' command
