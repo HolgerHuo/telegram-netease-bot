@@ -1,6 +1,5 @@
 import requests
 import os.path
-import re
 import yaml
 import logging
 
@@ -12,12 +11,14 @@ class Song(object):
     artist = ""
     id = 0
     url = ""
+    format = ""
 
-    def __init__(self, name, artist, id, url):
+    def __init__(self, name, artist, id, url, format):
         self.name = name
         self.artist = artist
         self.id = id
         self.url = url
+        self.format = format
 
 # Load API config
 config = yaml.safe_load(open("config.yml"))
@@ -36,17 +37,17 @@ def get_song_info(keyword):
     for song in songs.json()["result"]["songs"]:
         availability = request_api(api+"/check/music?id="+str(song["id"]))
         if availability.json()["success"]:
-            url = request_api(api+"/song/url?id="+str(song["id"])).json()["data"][0]["url"]
-            if url is not None:
+            song_meta = request_api(api+"/song/url?id="+str(song["id"])).json()["data"][0]
+            if song_meta["url"] is not None and song_meta["freeTrialInfo"] is None:
                 artists = []
                 for artist in song['artists']:
                     artists.append(artist['name'])
-                return Song(song["name"], '&'.join(artists), song["id"], url)
+                return Song(song["name"], '&'.join(artists), song["id"], song_meta["url"], song_meta["type"])
     return False
 
 # Download song
-def cache_song(id, url):
-    location = tmp_dir+str(id)+re.search('(\.[^.\\/:*?"<>|\r\n]+$)', url).group(1)
+def cache_song(id, url, format):
+    location = tmp_dir+str(id)+'.'+format
     if not os.path.isfile(location):
         data = requests.get(url)
         logger.warning("Song "+str(id)+" has been cached")

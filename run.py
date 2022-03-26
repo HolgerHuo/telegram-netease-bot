@@ -46,7 +46,7 @@ def handle_netease(message):
         logger.warning(keyword+" is not found!")
     else:  # Send Music
         bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="正在缓存\n「<b>"+song.name+"</b>」\nby "+song.artist, parse_mode='HTML')
-        location = netease.cache_song(song.id, song.url)
+        location = netease.cache_song(song.id, song.url, song.format)
         with open(location, 'rb') as music:
             bot.send_chat_action(message.chat.id, "upload_audio")
             bot.send_voice(chat_id=message.chat.id, reply_to_message_id=message.message_id, voice=music, caption="「<b>"+song.name+"</b>」\nby "+song.artist, parse_mode='HTML')
