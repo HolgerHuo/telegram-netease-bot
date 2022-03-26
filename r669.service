@@ -1,0 +1,14 @@
+[Unit]
+Description=Radio 669 Netease Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/r669/r669/
+ExecStart=/usr/local/bin/python3 /home/r669/r669/run.py
+Restart=always
+User=r669
+Group=r669
+
+[Install]
+WantedBy=multi-user.target

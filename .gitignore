@@ -1,0 +1,4 @@
+config.yml
+tmp/*
+!tmp/.gitkeep 
+__pycache__
