@@ -3,6 +3,7 @@ import sys
 import yaml
 import netease
 import telebot
+from telebot import util
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,9 @@ logging.basicConfig(level=getattr(logging, log_level.upper(), 10),
 if 'tgapi' in config['general']:
     from telebot import apihelper
     apihelper.API_URL = config['general']['tgapi']
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot(token, threaded=True)
+if 'threads' in config['general']:
+    bot.worker_pool = util.ThreadPool(num_threads=config['general']['threads'])
 
 # Handle '/start' and '/help' command
 @bot.message_handler(commands=['help', 'start'])
