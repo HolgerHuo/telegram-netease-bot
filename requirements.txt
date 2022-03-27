@@ -1,4 +1,6 @@
 pytelegrambotapi
 requests
 pyyaml
-eyeD3
+mutagen
+pillow
+requests-cache

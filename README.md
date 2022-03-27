@@ -9,6 +9,8 @@ A python telegram bot enabling you to send Netease Cloud Music in chats
 - Ease-of-use: No need to type "/" for command
 - Extensible: Built on Python3 with [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI)
 - Elastic Netease Backend: Powered by [NodeJS NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi)
+- Embed music tags automatically
+- Enhanced caching system
 
 ## 👷‍♂️ QuickStart
 
@@ -48,7 +50,7 @@ pip3 install -r requirements.txt
 python3 run.py
 ```
 
-An sample systemd service is shipped at r669.service. Add it to your system if you like.
+A sample systemd service is shipped at r669.service. Add it to your system if you like.
 
 Don't forget to change your bot's name, avatar, and about info and enjoy it!
 

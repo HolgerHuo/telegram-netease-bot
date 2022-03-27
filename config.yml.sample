@@ -7,3 +7,4 @@ netease:
   neteaseapi: https://netease-nodejs.vercel.app
   userid: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   tmpdir: ./tmp/
+  cached: True
