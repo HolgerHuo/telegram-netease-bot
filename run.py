@@ -28,6 +28,7 @@ bot = telebot.TeleBot(token, threaded=True)
 if 'threads' in config['general']:
     bot.worker_pool = util.ThreadPool(num_threads=config['general']['threads'])
 
+
 # Handle '/start' and '/help' command
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
@@ -42,18 +43,31 @@ def send_welcome(message):
 def handle_netease(message):
     keyword = message.text[2:]
     reply = bot.reply_to(message, text='正在搜索<b>'+ keyword+"</b>...", parse_mode='HTML')
-    song = netease.get_song_info(keyword.replace(" ", "+"))
+    try:
+        song = netease.get_song_info(keyword.replace(" ", "+"))
+    except Exception as e:
+        bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text='搜索\n<b>'+keyword+'</b>\n失败！请重试！', parse_mode='HTML')
+        logger.error(keyword+" search cannot be performed!")
+        logger.debug(e)
+    else:
     # Return copyright content error
-    if not song: 
-        bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text='<b>'+keyword+'</b>\n无法被找到或没有版权', parse_mode='HTML')
-        logger.warning(keyword+" is not found!")
-    else:  # Send Music
-        bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="正在缓存\n「<b>"+song.name+"</b>」\nby "+song.artist, parse_mode='HTML')
-        location = netease.cache_song(song.id, song.url, song.format, song.name, song.artist, song.album)
-        with open(location, 'rb') as music:
-            bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="正在发送\n「<b>"+song.name+"</b>」\nby "+song.artist, parse_mode='HTML')
-            bot.send_chat_action(message.chat.id, "upload_audio")
-            bot.send_audio(chat_id=message.chat.id, reply_to_message_id=message.message_id, audio=music, caption="「<b>"+song.name+"</b>」\nby "+song.artist, parse_mode='HTML')
-            bot.delete_message(chat_id=message.chat.id, message_id=reply.id)
+        if not song: 
+            bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text='<b>'+keyword+'</b>\n无法被找到或没有版权', parse_mode='HTML')
+            logger.warning(keyword+" is not found!")
+        else:  # Send Music
+            bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="正在缓存\n「<b>"+song.name+"</b>」\nby "+song.artist, parse_mode='HTML')
+            try:
+                location = netease.cache_song(song.id, song.url, song.format, song.name, song.artist, song.album)
+            except Exception as e:
+                bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="「<b>"+song.name+"</b>」\n缓存失败！请重试", parse_mode='HTML')
+                logger.error(song.name+" - "+song.artist+" could not be cached!")
+                logger.debug(e)
+            else:
+                bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="正在发送\n「<b>"+song.name+"</b>」\nby "+song.artist, parse_mode='HTML')
+                with open(location, 'rb') as music:
+                    bot.send_chat_action(message.chat.id, "upload_audio")
+                    bot.send_audio(chat_id=message.chat.id, reply_to_message_id=message.message_id, audio=music, caption="「<b>"+song.name+"</b>」\nby "+song.artist, parse_mode='HTML')
+                    bot.delete_message(chat_id=message.chat.id, message_id=reply.id)
+                logger.warning(song.name+' - '+song.artist+" has been sent to "+str(message.chat.id))
 
 bot.infinity_polling()
