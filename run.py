@@ -6,7 +6,7 @@ from utils.image_handler import gen_thumb
 import telebot
 from telebot import util
 
-logger = logging.getLogger('TMB')
+logger = logging.getLogger('TNB')
 logging.basicConfig(level=getattr(logging, helper.log_level.upper(), 10),
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
