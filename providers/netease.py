@@ -44,32 +44,29 @@ def get_song_info(song):
                 format = song.file.split('.')[-1]
                 if format == 'flac':
                     song.format = format
-                    return song
+                    return
                 elif _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]['type'] == format:
                     song.format = format
-                    return song
+                    return
             if _request_api(api+'/check/music?id='+str(song.id)).json()['success']:
                 song_meta = _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]
                 if song_meta['url'] is not None and song_meta['freeTrialInfo'] is None:
                     song_handler.set_song(song, url=song_meta['url'], format=song_meta['type'].lower())
-                    return song
+                    return
         song_handler.set_song(song, id=False)
-        return song
     else:
         song_handler.set_song(song, id=False)
-        return song
 
 # Get file location
 def get_file(song):
     try:
-        song = get_thumb(song, force=True)
+        get_thumb(song, force=True)
     except Exception as e:
         logger.error("Failed to cache thumbnail for "+song.title+" - "+song.artist)
         logger.debug(e)
-    song = cache.cache(song, 'netease')
-    return song
+    cache.cache(song, 'netease')
 
 # Cache thumb
 def get_thumb(song, force=False):
     song.thumb_url = _request_api(api+'/song/detail?ids='+str(song.id)).json()['songs'][0]['al']['picUrl']
-    return cache.cache_thumb(song, 'netease', force)
+    cache.cache_thumb(song, 'netease', force)

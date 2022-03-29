@@ -8,4 +8,3 @@ def gen_thumb(location):
             image.thumbnail(MAX_SIZE)
             image = image.convert('RGB')
             image.save(location)
-    return location

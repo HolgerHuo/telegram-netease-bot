@@ -52,7 +52,7 @@ def select_from_providers(message, song, provider):
     else:
         reply = bot.reply_to(message, text="正在搜索\n<b>"+song.keyword+"</b>...", parse_mode='HTML')
         try:
-            song = backend.get_song_info(song)
+            backend.get_song_info(song)
         except Exception as e: # Catch search error
             bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="搜索\n<b>"+song.keyword+"</b>\n失败！请重试！", parse_mode='HTML')
             logger.error("Search "+song.keyword+" in "+provider+" failed!")
@@ -68,7 +68,7 @@ def select_from_providers(message, song, provider):
                     song.thumb = cache.check(str(song.id), provider, image=True)
                     if not song.thumb:
                         try:
-                            song = backend.get_thumb(song)
+                            backend.get_thumb(song)
                         except Exception as e:
                             logger.error("Failed to cache thumbnail for "+song.title+" - "+song.artist)
                             logger.debug(e)
@@ -76,7 +76,7 @@ def select_from_providers(message, song, provider):
                 else:
                     bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="正在缓存\n"+name, parse_mode='HTML')
                     try: # Caching Audio
-                        song = backend.get_file(song)
+                        backend.get_file(song)
                     except Exception as e:
                         bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text=name+"\n缓存失败！请重试", parse_mode='HTML')
                         logger.error(song.title+" - "+song.artist+" could not be cached!")
@@ -88,12 +88,15 @@ def send_song(message, reply, song):
     name = "「<b>"+song.title+"</b>」\nby "+song.artist+"\n\n<i>"+song.alt+"</i>" if song.alt else "「<b>"+song.title+"</b>」\nby "+song.artist
     bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="正在发送\n"+name, parse_mode='HTML')
     bot.send_chat_action(message.chat.id, "upload_audio")
-    audio = open(song.file, 'rb')
-    thumb = open(gen_thumb(song.thumb), 'rb') if song.thumb else None
-    bot.send_audio(chat_id=message.chat.id, reply_to_message_id=message.message_id, audio=audio, caption=name, parse_mode='HTML', title=song.title, performer=song.artist, thumb=thumb)
-    audio.close()
-    if thumb:
-        thumb.close()
+    with open(song.file, 'rb') as a:
+        try:
+            gen_thumb(song.thumb)
+        except Exception as e:
+            logger.error("Failed to generate thumbs for "+song.title+" - "+song.artist)
+        thumb = open(song.thumb, 'rb') if song.thumb else None
+        bot.send_audio(chat_id=message.chat.id, reply_to_message_id=message.message_id, audio=a, caption=name, parse_mode='HTML', title=song.title, performer=song.artist, thumb=thumb)
+        if thumb:
+            thumb.close()
     bot.delete_message(chat_id=message.chat.id, message_id=reply.id)
     logger.info(song.title+' - '+song.artist+" has been sent to "+str(message.chat.id))
 

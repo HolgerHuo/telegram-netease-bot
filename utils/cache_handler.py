@@ -35,7 +35,6 @@ def cache(song, provider):
         logger.error("Failed to write tags to "+song.file+" of "+song.title+" - "+song.artist)
         logger.debug(e)
     logger.info("Song "+str(song.id)+" has been cached")
-    return song
 
 # Cache thumbnails
 def cache_thumb(song, provider, force=False): 
@@ -52,7 +51,5 @@ def cache_thumb(song, provider, force=False):
         with open(location, 'wb')as f:
             f.write(img.content)
         song.thumb = location
-        return song
     else:
         song.thumb = check(str(song.id), provider, image=True)
-        return song
