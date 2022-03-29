@@ -45,7 +45,7 @@ def get_song_info(song):
                 if format == 'flac':
                     song.format = format
                     return
-                elif _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]['type'] == format:
+                elif not _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]['type'] or _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]['type'] == format:
                     song.format = format
                     return
             if _request_api(api+'/check/music?id='+str(song.id)).json()['success']:
