@@ -34,7 +34,7 @@ def cache(song, provider):
     except Exception as e:
         logger.error("Failed to write tags to "+song.file+" of "+song.title+" - "+song.artist)
         logger.debug(e)
-    logger.warning("Song "+str(song.id)+" has been cached")
+    logger.info("Song "+str(song.id)+" has been cached")
     return song
 
 # Cache thumbnails

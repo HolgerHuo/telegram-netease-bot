@@ -25,33 +25,37 @@ def _request_api(url):
 
 # Search for songs
 def get_song_info(song):
-    for s in _request_api(api+'/cloudsearch?keywords='+song.keyword+'&type=1').json()['result']['songs']:
-        artists = []
-        for artist in s['ar']:
-            artists.append(artist['name'])
-        alt = s['alia'][0] if s['alia'] else None
-        song_handler.set_song(song,
-            id = s['id'],
-            title = s['name'],
-            artist = '&'.join(artists),
-            album = s['al']['name'],
-            alt = alt,
-            file = cache.check(str(s['id']), 'netease') # Check for cache as part of availability check
-        )  
-        if song.file:
-            format = song.file.split('.')[-1]
-            if format == 'flac':
-                song.format = format
-                return song
-            elif _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]['type'] == format:
-                song.format = format
-                return song
-        if _request_api(api+'/check/music?id='+str(song.id)).json()['success']:
-            song_meta = _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]
-            if song_meta['url'] is not None and song_meta["freeTrialInfo"] is None:
-                song_handler.set_song(song, url=song_meta['url'], format=song_meta['type'].lower())
-                return song
-    return song_handler.set_song(song, id=False)
+    result = _request_api(api+'/cloudsearch?keywords='+song.keyword+'&type=1').json()
+    if result['result']['songs']:
+        for s in result['result']['songs']:
+            artists = []
+            for artist in s['ar']:
+                artists.append(artist['name'])
+            alt = s['alia'][0] if s['alia'] else None
+            song_handler.set_song(song,
+                id = s['id'],
+                title = s['name'],
+                artist = '&'.join(artists),
+                album = s['al']['name'],
+                alt = alt,
+                file = cache.check(str(s['id']), 'netease') # Check for cache as part of availability check
+            )  
+            if song.file:
+                format = song.file.split('.')[-1]
+                if format == 'flac':
+                    song.format = format
+                    return song
+                elif _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]['type'] == format:
+                    song.format = format
+                    return song
+            if _request_api(api+'/check/music?id='+str(song.id)).json()['success']:
+                song_meta = _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]
+                if song_meta['url'] is not None and song_meta["freeTrialInfo"] is None:
+                    song_handler.set_song(song, url=song_meta['url'], format=song_meta['type'].lower())
+                    return song
+        return song_handler.set_song(song, id=False)
+    else:
+        return song_handler.set_song(song, id=False)
 
 # Get file location
 def get_file(song):
