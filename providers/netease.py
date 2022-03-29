@@ -26,7 +26,7 @@ def _request_api(url):
 # Search for songs
 def get_song_info(song):
     result = _request_api(api+'/cloudsearch?keywords='+song.keyword+'&type=1').json()
-    if result['result']['songs']:
+    if 'songs' in result['result']:
         for s in result['result']['songs']:
             artists = []
             for artist in s['ar']:
@@ -53,9 +53,11 @@ def get_song_info(song):
                 if song_meta['url'] is not None and song_meta['freeTrialInfo'] is None:
                     song_handler.set_song(song, url=song_meta['url'], format=song_meta['type'].lower())
                     return song
-        return song_handler.set_song(song, id=False)
+        song_handler.set_song(song, id=False)
+        return song
     else:
-        return song_handler.set_song(song, id=False)
+        song_handler.set_song(song, id=False)
+        return song
 
 # Get file location
 def get_file(song):
