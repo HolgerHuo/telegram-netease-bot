@@ -44,8 +44,10 @@ def cache_thumb(song, provider, force=False):
         os.makedirs(tmp_dir)
     if force or not check(str(song.id), provider, image=True):
         img = requests.get(song.thumb_url)
-        mime = 'image/jpeg' if img.headers['content-type'] == 'image/jpg' else img.headers['content-type']
+        mime = 'image/jpeg' if img.headers['content-type'].split(";")[0] == 'image/jpg' else img.headers['content-type'].split(";")[0]
         ext = mimetypes.guess_extension(mime)
+        if not ext:
+            ext = '.'+song.thumb_url.split('.')[-1].lower()[0:3]
         location = tmp_dir+str(song.id) + ext
         with open(location, 'wb')as f:
             f.write(img.content)
