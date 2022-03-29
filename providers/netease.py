@@ -56,7 +56,7 @@ def get_song_info(song):
 # Get file location
 def get_file(song):
     try:
-        song = get_thumb(song)
+        song = get_thumb(song, force=True)
     except Exception as e:
         logger.error("Failed to cache thumbnail for "+song.title+" - "+song.artist)
         logger.debug(e)
@@ -64,6 +64,6 @@ def get_file(song):
     return song
 
 # Cache thumb
-def get_thumb(song):
+def get_thumb(song, force=False):
     song.thumb_url = _request_api(api+'/song/detail?ids='+str(song.id)).json()['songs'][0]['al']['picUrl']
-    return cache.cache_thumb(song, 'netease')
+    return cache.cache_thumb(song, 'netease', force)

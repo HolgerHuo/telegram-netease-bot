@@ -23,7 +23,7 @@ def write_tags(song):
                 image.data = img.read()
             audio.add_picture(image)
             audio.save()
-    if format == 'mp3':
+    if song.format == 'mp3':
         from mutagen.easyid3 import EasyID3
         audio = EasyID3(song.file)
         audio["title"] = song.title
