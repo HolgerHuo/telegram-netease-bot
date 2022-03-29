@@ -1,6 +1,6 @@
 pytelegrambotapi
 requests
+requests-cache
 pyyaml
 mutagen
 pillow
-requests-cache

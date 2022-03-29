@@ -1,10 +1,10 @@
 general:
   loglevel: INFO
   token: 0000000000:xxxxxxxxxxxxxxxxxxxxxxx
+  tmpdir: ./tmp/
+  threads: 2
 #  tgapi: http://localhost:4200/bot{0}/{1}
-#  threads: 2
 netease:
   neteaseapi: https://netease-nodejs.vercel.app
   userid: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-  tmpdir: ./tmp/
   cached: True
