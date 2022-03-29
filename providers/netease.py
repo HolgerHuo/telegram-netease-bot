@@ -50,7 +50,7 @@ def get_song_info(song):
                     return song
             if _request_api(api+'/check/music?id='+str(song.id)).json()['success']:
                 song_meta = _request_api(api+'/song/url?id='+str(song.id)).json()['data'][0]
-                if song_meta['url'] is not None and song_meta["freeTrialInfo"] is None:
+                if song_meta['url'] is not None and song_meta['freeTrialInfo'] is None:
                     song_handler.set_song(song, url=song_meta['url'], format=song_meta['type'].lower())
                     return song
         return song_handler.set_song(song, id=False)

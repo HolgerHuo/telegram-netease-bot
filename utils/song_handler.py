@@ -7,8 +7,8 @@ def write_tags(song):
     if song.format == 'flac':
         from mutagen.flac import Picture, FLAC
         audio = FLAC(song.file)
-        audio["TITLE"] = song.title
-        audio['ARTIST'] = song.artist
+        audio['TITLE'] = song.title
+        audio['ARTIST'] = song.artist.split('&')
         audio['ALBUM'] = song.album
         audio.save()
         if song.thumb:
@@ -26,8 +26,8 @@ def write_tags(song):
     if song.format == 'mp3':
         from mutagen.easyid3 import EasyID3
         audio = EasyID3(song.file)
-        audio["title"] = song.title
-        audio['artist'] = song.artist
+        audio['title'] = song.title
+        audio['artist'] = song.artist.split('&')
         audio['album'] = song.album
         audio.save()
         if song.thumb:

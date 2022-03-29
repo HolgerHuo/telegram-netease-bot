@@ -35,11 +35,11 @@ class Song(object):
 # Handle '/start' and '/help' command
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
-    bot.send_chat_action(message.chat.id, "typing")
+    bot.send_chat_action(message.chat.id, 'typing')
     bot.reply_to(message, """欢迎使用669点歌台!\n\n发送\n<b>点歌</b> 歌曲名称\n进行网易云搜索！\n\nPowered by <b><a href='https://github.com/HolgerHuo/telegram-netease-bot/'>TelegramNeteaseBot</a></b>\n<a href='https://dragon-fly.club/'>DragonFly Club</a>""",parse_mode='HTML')
 
 # Handle 点歌
-@bot.message_handler(regexp="^(?:点歌|dg|wy) .*")
+@bot.message_handler(regexp='^(?:点歌|dg|wy) .*')
 def handle_netease(message):
     select_from_providers(message, Song(message.text[3:]), 'netease')
 
