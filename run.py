@@ -63,17 +63,16 @@ def select_from_providers(message, song, provider):
                 logger.warning(song.keyword+" is not found!")
             else:  
                 name = "「<b>"+song.title+"</b>」\nby "+song.artist+"\n\n<i>"+song.alt+"</i>" if song.alt else "「<b>"+song.title+"</b>」\nby "+song.artist
-                if cache.check(song.id, provider):# cache hit, send directly
+                if cache.check(song.id, provider) and cache.check(str(song.id), provider).split('.')[-1] == song.format:# cache hit, send directly
                     song.file = cache.check(str(song.id), provider)
-                    if song.file.split('.')[-1] == song.format:
-                        song.thumb = cache.check(str(song.id), provider, image=True)
-                        if not song.thumb:
-                            try:
-                                backend.get_thumb(song)
-                            except Exception as e:
-                                logger.error("Failed to cache thumbnail for "+song.title+" - "+song.artist)
-                                logger.debug(e)
-                        send_song(message, reply, song)
+                    song.thumb = cache.check(str(song.id), provider, image=True)
+                    if not song.thumb:
+                        try:
+                            backend.get_thumb(song)
+                        except Exception as e:
+                            logger.error("Failed to cache thumbnail for "+song.title+" - "+song.artist)
+                            logger.debug(e)
+                    send_song(message, reply, song)
                 else:
                     bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="正在缓存\n"+name, parse_mode='HTML')
                     try: # Caching Audio
