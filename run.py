@@ -3,8 +3,8 @@ import importlib
 import helper
 import utils.cache_handler as cache
 from utils.image_handler import gen_thumb
+import providers.youtube as youtube
 import telebot
-from telebot import util
 
 logger = logging.getLogger('TNB')
 logging.basicConfig(level=getattr(logging, helper.log_level.upper(), 10),
@@ -14,8 +14,7 @@ logging.basicConfig(level=getattr(logging, helper.log_level.upper(), 10),
 if 'tgapi' in helper.config['general']:
     from telebot import apihelper
     apihelper.API_URL = helper.config['general']['tgapi']
-bot = telebot.TeleBot(helper.token, threaded=True)
-bot.worker_pool = util.ThreadPool(num_threads=helper.threads) 
+bot = telebot.TeleBot(helper.token, threaded=True, num_threads=helper.threads)
 
 # Construct Song Class
 class Song(object):
@@ -36,7 +35,7 @@ class Song(object):
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
     bot.send_chat_action(message.chat.id, 'typing')
-    bot.reply_to(message, """欢迎使用669点歌台!\n\n发送\n<b>点歌</b> 歌曲名称\n进行网易云搜索！\n\nPowered by <b><a href='https://github.com/HolgerHuo/telegram-netease-bot/'>TelegramNeteaseBot</a></b>\n<a href='https://dragon-fly.club/'>DragonFly Club</a>""",parse_mode='HTML')
+    bot.reply_to(message, """欢迎使用669点歌台!\n\n发送\n<b>点歌/dg/wy</b> 歌曲名称\n进行网易云搜索！\n<b>yt/油管</b> 歌曲名称\n进行YouTube搜索！\n\nPowered by <b><a href='https://github.com/HolgerHuo/telegram-netease-bot/'>TelegramNeteaseBot</a></b>\n<a href='https://dragon-fly.club/'>DragonFly Club</a>""",parse_mode='HTML')
 
 # Handle 点歌
 @bot.message_handler(regexp='^(?:点歌|dg|wy) .*')
@@ -99,6 +98,32 @@ def send_song(message, reply, song):
             thumb.close()
     bot.delete_message(chat_id=message.chat.id, message_id=reply.id)
     logger.info(song.title+' - '+song.artist+" has been sent to "+str(message.chat.id))
+
+@bot.message_handler(regexp='^(?:yt|油管|视频) .*')
+def handle_youtube(message):
+    reply = bot.reply_to(message, text="正在搜索\n<b>"+message.text[3:]+"</b>...", parse_mode='HTML')
+    try:
+        song = youtube.get_song_info(message.text[3:])
+    except Exception: # Catch search error
+        bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="搜索\n<b>"+message.text[3:]+"</b>\n失败！请重试！", parse_mode='HTML')
+    else:
+        if not song: # Return song not found error
+            bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="<b>"+message.text[3:]+"</b>\n无法被找到或超过10分钟", parse_mode='HTML')
+        else:  
+            if 'track' in song:
+                song['title'] = song['track']
+            name = "「<b>"+song['title']+"</b>」\nby "+song['artist'] if 'artist' in song else "「<b>"+song['title']+"</b>」"
+            if not 'artist' in song:
+                song['artist'] = None
+            bot.edit_message_text(chat_id=message.chat.id, message_id=reply.id, text="正在发送\n"+name, parse_mode='HTML')
+            bot.send_chat_action(message.chat.id, "upload_audio")
+            with open(song['file'], 'rb') as a:
+                thumb = open(song['thumb'], 'rb') if 'thumb' in song else None
+                bot.send_audio(chat_id=message.chat.id, reply_to_message_id=message.message_id, audio=a, caption=name, parse_mode='HTML', title=song['title'], performer=song['artist'], thumb=thumb)
+                if thumb:
+                    thumb.close()
+            bot.delete_message(chat_id=message.chat.id, message_id=reply.id)
+            logger.info(song['title']+" has been sent to "+str(message.chat.id))
 
 # Start polling
 bot.infinity_polling()

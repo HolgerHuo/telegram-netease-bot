@@ -1,8 +1,11 @@
 # Telegram Netease Bot - Telegram 网易云音乐 Bot
 
+Note: As the initial version of this bot is of low quality and is hard to extent horizontally, future development on this version may be dropped. A rewrite of this program is expected to be born some time around Jan. 2023.
+---
+
 ![GitHub last commit](https://img.shields.io/github/last-commit/holgerhuo/telegram-netease-bot)![GitHub release (latest by date)](https://img.shields.io/github/v/release/holgerhuo/telegram-netease-bot)![GitHub](https://img.shields.io/github/license/holgerhuo/telegram-netease-bot)![GitHub all releases](https://img.shields.io/github/downloads/holgerhuo/telegram-netease-bot/total)![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/holgerhuo/telegram-netease-bot)
 
-A python telegram bot enabling you to send Netease Cloud Music in chats
+A python telegram bot enabling you to send **Netease Cloud Music** and **YouTube music (extracted from videos)** in chats
 
 ## ✨ Features
 
