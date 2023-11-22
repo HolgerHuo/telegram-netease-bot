@@ -11,6 +11,8 @@ try:
     token = config['general']['token']
     threads = config['general']['threads']
     tmp_dir = os.path.join(os.path.abspath(config['general']['tmpdir']),'')
+    ncmapi = config['netease']['neteaseapi']
+    ncmuserid = config['netease']['userid']
 except Exception as e:
     logger.critical("config.yml is not valid!")
     logger.debug(e)

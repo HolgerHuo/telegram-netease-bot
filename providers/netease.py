@@ -7,8 +7,7 @@ import requests
 logger = logging.getLogger(__name__)
 
 # Load API config
-api = helper.config['netease']['neteaseapi']
-userid = helper.config['netease']['userid']
+api = helper.ncmapi
 cached = helper.config['netease']['cached']
 
 if cached: # Create caching session
@@ -18,7 +17,7 @@ if cached: # Create caching session
 
 # Wrap RESTful API access
 def _request_api(url):
-    cookies = {'MUSIC_U': userid}
+    cookies = {'MUSIC_U': helper.ncmuserid}
     if cached:
         return session.get(url, cookies=cookies)
     return requests.get(url, cookies=cookies)

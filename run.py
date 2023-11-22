@@ -125,5 +125,127 @@ def handle_youtube(message):
             bot.delete_message(chat_id=message.chat.id, message_id=reply.id)
             logger.info(song['title']+" has been sent to "+str(message.chat.id))
 
+from time import time
+from flask import Flask, request
+import requests
+import threading
+
+app = Flask(__name__)
+
+app.logger.disabled = True
+logging.getLogger('werkzeug').disabled = True
+
+api = helper.ncmapi
+userid = helper.ncmuserid
+
+@app.route('/check')
+def check():
+    ts = str(int(time()))
+    status = requests.get(api+'/login/status?timestamp=' + ts, cookies={'MUSIC_U': userid})
+    if not status.json()['data']['account']:
+        return {"status": False, "api": api}
+    else:
+        return {"status": True}
+
+@app.route('/update', methods=['POST'])
+def update():
+    key = request.get_json().get('key')
+    ts = str(int(time()))
+    key_status = requests.get(
+        api+'/login/status?timestamp='+ts, cookies={'MUSIC_U': key})
+    if (key_status.json()['data']['account'] is not None):
+        with open('config.yml', 'r+') as f:
+            global userid
+            global helper
+            src = f.read()
+            f.seek(0)
+            src = src.replace(userid, key)
+            f.write(src)
+            f.truncate()
+            userid = key
+            helper.ncmuserid = key
+        return {"status": True}
+    else:
+        return {"status": False, "api": api}
+
+@app.route("/")
+def entry():
+    return """
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scan to login to NCM</title>
+</head>
+
+<body>
+    <img id="qrImg" />
+    <div id="info" class="info"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.26.1/dist/axios.min.js
+    "></script>
+    <script>
+        let base
+        async function checkStatus(key) {
+            const res = await axios({
+                url: `${base}/login/qr/check?key=${key}&timestamp=${Date.now()}&noCookie=true`,
+            })
+            return res.data
+        }
+        async function login() {
+            const status = await axios({
+                url: `${window.location}/check`,
+            })
+            if (!status.data.status) {
+                document.querySelector('#info').innerText = "Login expired, scan QRCode to refresh!"
+                base = status.data.api
+                let timer
+                const res = await axios({
+                    url: `${base}/login/qr/key?timestamp=${Date.now()}`,
+                })
+                const key = res.data.data.unikey
+                const res2 = await axios({
+                    url: `${base}/login/qr/create?key=${key}&qrimg=true&timestamp=${Date.now()}`,
+                })
+                document.querySelector('#qrImg').src = res2.data.data.qrimg
+
+                timer = setInterval(async () => {
+                    const statusRes = await checkStatus(key)
+                    if (statusRes.code === 800) {
+                        document.querySelector('#info').innerText = 'QRCode expired, refresh page'
+                        clearInterval(timer)
+                    }
+                    if (statusRes.code === 803) {
+                        clearInterval(timer)
+                        updateStatus = await axios({
+                            url: `${window.location}/update`,
+                            method: 'post',
+                            data: {
+                                "key": statusRes.cookie.replaceAll(' HTTPOnly', '').split(";").map(cookie => cookie.startsWith('MUSIC_U') && cookie.slice(8) || undefined).join(''),
+                            },
+                        })
+                        login()
+                    }
+                }, 3000)
+            } else {
+                document.querySelector('#info').innerText = "Login information ok!"
+                document.querySelector('#qrImg').src = ''
+            }
+        }
+        login()
+    </script>
+    <style>
+        .info {
+            white-space: pre;
+        }
+    </style>
+</body>
+
+</html>
+"""
+
+threading.Thread(target=lambda: app.run(host='127.0.0.1', port=5000)).start()
+
 # Start polling
-bot.infinity_polling()
+threading.Thread(target=lambda: bot.infinity_polling()).start()
